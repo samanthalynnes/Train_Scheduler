@@ -14,12 +14,69 @@ var firebaseConfig = {
   firebase.initializeApp(firebaseConfig);
   var database = firebase.database();
   var userInput;
+
+  // On click function for submit button to take in data
   $("#submitButton").on("click", function(event) {
       event.preventDefault();
+
+      // Grabs user input
         var trainName = $("#train-name").val().trim();
-    console.log(trainName.match(/[a-z]/i));
-        var destination = $("#fin")
+        var destination = $("#final-stop").val().trim();
+        var frequency = $("#train-frequency").val().trim();
+        var firstTrainTime = $("#first-train-time").val().trim();
 
-  })
+        // Creates local "temporary" oject for holding data
+        var newTrain = {
+            name: trainName,
+            destination: destination,
+            frequency: frequency,
+            firstTrainTime: firstTrainTime,
+        };
 
-})
+        // Uploads new data to the database
+        database.ref().push(newTrain);
+
+        // Log everything to the console
+        console.log(newTrain.name);
+        console.log(newTrain.destination);
+        console.log(newTrain.frequency);
+        console.log(newTrain.firstTrainTime);
+
+        // Clears all of the text boxes
+        $("input").val("");
+});
+    // Creates firebase event for addding data to the database
+    database.ref().on("child_added", function(childSnapshot) {
+      console.log(childSnapshot.val());
+
+    // Store everything into a new variable
+    var newTrainName = childSnapshot.val().name;
+    var newDestination = childSnapshot.val().destination;
+    var newFrequency = childSnapshot.val().frequency;
+    var newTime = childSnapshot.val().firstTrainTime;
+
+    // New train info
+    console.log(newTrainName);
+    console.log(newDestination);
+    console.log(newFrequency);
+    console.log(newTime);
+
+    // Calculate the minutes away the next train will be
+    var minutesAway = moment().diff(moment());
+    console.log(minutesAway);
+
+    // Create the new row
+    var newRow = $("<tr").append(
+        ($("<td>").text(newTrainName),
+        ($("<td>").text(newDestination),
+        ($("<td>").text(newFrequency),
+        ($("<td>").text(newTime),
+        ($("<td>").text(minutesAway)
+        );
+
+    // Append the new row to the table
+    $("#table-body > tbody").append(newRow);
+       
+  });
+
+});
